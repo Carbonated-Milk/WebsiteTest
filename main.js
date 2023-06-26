@@ -17,6 +17,7 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setPixelRatio(window.devicePixelRatio);
 renderer.setSize(window.innerWidth, window.innerHeight);
 camera.position.setZ(30)
+const originalAspect = window.innerWidth / window.innerHeight;
 
 renderer.render(scene, camera);
 
@@ -54,7 +55,7 @@ function addStar() {
 Array(1000).fill().forEach(addStar)
 
 
-const spaceTexture = new THREE.TextureLoader().load('NightSky.avif',addStar);
+const spaceTexture = new THREE.TextureLoader().load('Space.jfif');
 //scene.background = spaceTexture;
 
 //Earth
@@ -62,14 +63,15 @@ const spaceTexture = new THREE.TextureLoader().load('NightSky.avif',addStar);
 const earthTexture = new THREE.TextureLoader().load('EarthMap.jpg');
 const earthNormal = new THREE.TextureLoader().load('EarthNormal.tif');
 
-const earth = new THREE.Mesh(
-    new THREE.SphereGeometry(3, 32, 32),
-    new THREE.MeshStandardMaterial({
+const earth = new THREE.Mesh(   
+    new THREE.SphereGeometry(10, 32, 32),
+    new THREE.MeshBasicMaterial({
         map: earthTexture,
         normalMap: earthNormal,
     })
 )
 scene.add(earth);
+earth.rotateX(.5);
 
 function moveCamera(){
     const t = document.body.getBoundingClientRect().top;
@@ -85,12 +87,29 @@ moveCamera();
 function animate() {
     requestAnimationFrame( animate );
 
-    //controls.update();
+    earth.rotateY(.001);
 
     renderer.render(scene, camera);
 }
 
-animate()
+function onWindowResize() {
+    var viewSize = 2;
+    var aspect = window.innerWidth / window.innerHeight;
+    var change = originalAspect / aspect;
+    var newSize = viewSize * change;
+    camera.left = -aspect * newSize / 2;
+    camera.right = aspect * newSize  / 2;
+    camera.top = newSize / 2;
+    camera.bottom = -newSize / 2;
+    camera.updateProjectionMatrix();
+    camera.aspect = window.innerWidth / window.innerHeight;
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    animate();
+}
+
+window.addEventListener('fullscreenchange', onWindowResize, false);
+window.addEventListener('resize', onWindowResize, false);
+animate();
 
 
 
